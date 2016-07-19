@@ -39,5 +39,10 @@ namespace PasswordManager
         {
             if (e.KeyChar == (char)ConsoleKey.Enter) { OK_Click(null, null); }
         }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)ConsoleKey.Enter) { OK_Click(null, null); }
+        }
     }
 }

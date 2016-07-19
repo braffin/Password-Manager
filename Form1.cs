@@ -15,13 +15,8 @@ namespace PasswordManager
     {
         #region Variables
         string[] Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
-        StreamWriter Accountsfile = new StreamWriter(@"C:\Users\Public\Documents\Accounts.txt");
-
         string[] Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
-        StreamWriter Accessiblesfile = new StreamWriter(@"C:\Users\Public\Documents\Accessibles.txt");
-
         string[] Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
-        StreamWriter Usernamesfile = new StreamWriter(@"C:\Users\Public\Documents\Usernames.txt");
         #endregion
 
         public Form1()
@@ -31,17 +26,16 @@ namespace PasswordManager
             richTextBox1.Width = richTextBox1.Width + 180;
             //richTextBox1.AppendText("Which account would you like?\r\n"); richTextBox1.Focus();
             //inputText.();
-            Accountsfile.WriteLine(Accounts);
-            Usernamesfile.WriteLine(Usernames);
-            Accessiblesfile.WriteLine(Accessibles);
+            //StreamWriter Accountsfile = new StreamWriter(@"C:\Users\Public\Documents\Accounts.txt");
+            //StreamWriter Accessiblesfile = new StreamWriter(@"C:\Users\Public\Documents\Accessibles.txt");
+            //StreamWriter Usernamesfile = new StreamWriter(@"C:\Users\Public\Documents\Usernames.txt");
+            //for(int i = 0; i<Accounts.Length; i++) { Accountsfile.WriteLine(Accounts[i]); }
+            //for(int i = 0; i<Usernames.Length; i++) { Usernamesfile.WriteLine(Usernames); }
+            //for(int i = 0; i<Accessibles.Length; i++) { Accessiblesfile.WriteLine(Accessibles); }
+            //Accountsfile.Close();
+            //Usernamesfile.Close();
+            //Accessiblesfile.Close();
 
-        }
-
-        private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Accountsfile.WriteLine(Accounts);
-            Usernamesfile.WriteLine(Usernames);
-            Accessiblesfile.WriteLine(Accessibles);
         }
 
         //This is outside the method because it shouldn't be reset to 0 every time the check box is clicked
@@ -58,7 +52,7 @@ namespace PasswordManager
             LogBox.AppendText("\"New Account\" button clicked\r\n");
             int newaccountarrayvalue = VerifyDoesntExist(inputText.Text);
             if (newaccountarrayvalue == 1000000000)
-            { NewAccount(); richTextBox1.Focus(); }
+            { NewAccount(); RefreshArrays(); richTextBox1.Focus(); }
             else{ richTextBox1.AppendText("That account already exists, you need to select \"Change Information\" to do something about that.\r\n"); }
             
         }
@@ -77,14 +71,14 @@ namespace PasswordManager
         {
             int accountarrayvalue = ValidateAccount(inputText.Text);
             if(accountarrayvalue != 1000000000)
-            { GetPassword(accountarrayvalue); richTextBox1.Focus(); }
+            { GetPassword(accountarrayvalue); RefreshArrays(); richTextBox1.Focus(); }
         }
 
         private void CHANGEINFORMATION_CLICK(object sender, EventArgs e)
         {
             LogBox.AppendText("\"Change Information\" button clicked\r\n");
             int accountarrayvalue = ValidateAccount(inputText.Text);
-            if(accountarrayvalue != 1000000000) { ChangeInfo(accountarrayvalue); richTextBox1.Focus(); }
+            if(accountarrayvalue != 1000000000) { ChangeInfo(accountarrayvalue); RefreshArrays(); richTextBox1.Focus(); }
             
         }
 
@@ -92,7 +86,7 @@ namespace PasswordManager
         {
             LogBox.AppendText("Delete button clicked\r\n");
             int accountarrayvalue = ValidateAccount(inputText.Text);
-            if(accountarrayvalue != 1000000000) { DeleteAccount(accountarrayvalue); }
+            if(accountarrayvalue != 1000000000) { DeleteAccount(accountarrayvalue); RefreshArrays(); }
         }
 
         private Array GetAccounts()
@@ -102,6 +96,19 @@ namespace PasswordManager
             form1.LogBox.AppendText("Accounts file Successfully read\r\n About to return as array variable");
            return (Accounts);
            
+        }
+
+        private void RefreshArrays()
+        {
+            //write the new account information to the text file
+            File.WriteAllLines(@"C:\Users\Public\Documents\Accounts.txt", Accounts);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Usernames.txt", Usernames);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Accessibles.txt", Accessibles);
+
+            //read the account information to the old arrays so that the form can now have updated information
+            Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
+            Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
+            Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
         }
 
         private void GetPassword(int accountarrayvalue)
@@ -120,11 +127,10 @@ namespace PasswordManager
                 ChangeUsername changeusernameForm = new ChangeUsername(this); changeusernameForm.ShowDialog();
                 string newusername = changeusernamebox.Text;
 
-                if (changeusernamebox.Text != String.Empty)
+                if (changeusernamebox.Text != string.Empty)
                 {
                     Usernames[accountarrayvalue] = newusername;
                     richTextBox1.AppendText("The new username is: \t" + Usernames[accountarrayvalue] + "\r\n");
-                    File.WriteAllLines(@"C:\Users\Public\Documents\Usernames.txt", Usernames);
                 }
                 
             }// end if
@@ -134,11 +140,10 @@ namespace PasswordManager
                 ChangePassword changepasswordForm = new ChangePassword(this); changepasswordForm.ShowDialog();
                 string newpassword = changepasswordbox.Text;
 
-                if (changepasswordbox.Text != String.Empty)
+                if (changepasswordbox.Text != string.Empty)
                 {
                     Accessibles[accountarrayvalue] = newpassword;
                     richTextBox1.AppendText("The new password is: \t" + Accessibles[accountarrayvalue] + "\r\n");
-                    File.WriteAllLines(@"C:\Users\Public\Documents\Accessibles.txt", Accessibles);
                 }
                 
             }// end if
@@ -147,7 +152,7 @@ namespace PasswordManager
             //{richTextBox1.AppendText("Usernames array: \t" + Usernames[i]);}
             //for (int i = 0; i<Accessibles.Length; i++)
             //{ richTextBox1.AppendText("Passwords array: \t" + Accessibles[i]); }
-            //changeusernamebox.Clear();changepasswordbox.Clear();
+            changeusernamebox.Clear(); changepasswordbox.Clear();
         }
         private void NewAccount()
         {
@@ -163,20 +168,54 @@ namespace PasswordManager
                     string newpassword = newpasswordbox.Text;
                     if (newpasswordbox.Text != String.Empty)
                     {
+                        //create new arrays that are one unit longer than current account arrays to store the new account in the last spot
+                        string[] NewAccountsArray = new string[Accounts.Length + 1];
+                        string[] NewUsernamesArray = new string[Usernames.Length + 1];
+                        string[] NewPasswordsArray = new string[Accessibles.Length + 1];
+                        
+                        //fill the new arrays with the information from the old accounts array
+                        for (int i = 0; i < Accounts.Length; i++)
+                        { NewAccountsArray[i] = Accounts[i]; NewUsernamesArray[i] = Usernames[i];NewPasswordsArray[i] = Accessibles[i]; }
+                        
+                        //make the final spot in the new array the new account information
+                        NewAccountsArray[Accounts.Length] = newaccountname;
+                        NewUsernamesArray[Usernames.Length] = newusername;
+                        NewPasswordsArray[Accessibles.Length] = newpassword;
+
+                        //write the new account information to the text file
+                        File.WriteAllLines(@"C:\Users\Public\Documents\Accounts.txt", NewAccountsArray);
+                        File.WriteAllLines(@"C:\Users\Public\Documents\Usernames.txt", NewUsernamesArray);
+                        File.WriteAllLines(@"C:\Users\Public\Documents\Accessibles.txt", NewPasswordsArray);
+
+                        //read the account information to the old arrays so that the form can now have updated information
+                        Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
+                        Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
+                        Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
+
+                        //StreamWriter Accountsfile = new StreamWriter(@"C:\Users\Public\Documents\Accounts.txt");
+                        //StreamWriter Accessiblesfile = new StreamWriter(@"C:\Users\Public\Documents\Accessibles.txt");
+                        //StreamWriter Usernamesfile = new StreamWriter(@"C:\Users\Public\Documents\Usernames.txt");
+                        //for (int i = 0; i < Accounts.Length; i++) { Accountsfile.WriteLine(Accounts[i]); }
+                        //for (int i = 0; i < Usernames.Length; i++) { Usernamesfile.WriteLine(Usernames[i]); }
+                        //for (int i = 0; i < Accessibles.Length; i++) { Accessiblesfile.WriteLine(Accessibles[i]); }
+                        //Accountsfile.WriteLine(newaccountname); 
+                        //Usernamesfile.WriteLine(newusername); 
+                        //Accessiblesfile.WriteLine(newpassword); 
+                        //Accountsfile.Close();Accessiblesfile.Close();Usernamesfile.Close();
                         //Accounts[Accounts.Length + 1] = newaccountname;
                         richTextBox1.AppendText("The new account name is: \t" + newaccountname + "\r\n");
-                        Accountsfile.WriteLine(newaccountname);Accountsfile.Close();
-                        Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
+                        //Accountsfile.WriteLine(newaccountname);Accountsfile.Close();
+                        
 
                         //Usernames[Usernames.Length + 1] = newusername;
                         richTextBox1.AppendText("The new username for the account is: \t" + newusername + "\r\n");
-                        Usernamesfile.WriteLine(newusername);Usernamesfile.Close();
-                        Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
+                       // Usernamesfile.WriteLine(newusername);Usernamesfile.Close();
+                        
 
                         //Accessibles[Accessibles.Length + 1] = newpassword;
                         richTextBox1.AppendText("The new password for the account is: \t" + newpassword + "\r\n");
-                        Accessiblesfile.WriteLine(newpassword); Accessiblesfile.Close();
-                        Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
+                        //Accessiblesfile.WriteLine(newpassword); Accessiblesfile.Close();
+                        
                     }
                 }
             }
@@ -184,24 +223,54 @@ namespace PasswordManager
         }
         private void DeleteAccount(int accountarrayvalue)
         {
-            foreach (string line in Accounts)
-            {
-                if (!line.Contains(Accounts[accountarrayvalue]))
-                { Accountsfile.WriteLine(line); }
-            }
-            foreach (string line in Usernames)
-            {
-                if (!line.Contains(Usernames[accountarrayvalue]))
-                { Usernamesfile.WriteLine(line); }
-            }
-            foreach (string line in Accessibles)
-            {
-                if (!line.Contains(Accessibles[accountarrayvalue]))
-                {Accessiblesfile.WriteLine(line);}
-            }
-            Accountsfile.Close();
-            Usernamesfile.Close();
-            Accessiblesfile.Close();
+            //Accounts[accountarrayvalue] = string.Empty;
+            //Usernames[accountarrayvalue] = string.Empty;
+            //Accessibles[accountarrayvalue] = string.Empty;
+
+            //create new arrays that are one unit shorter than current account arrays
+            string[] NewAccountsArray = new string[Accounts.Length - 1];
+            string[] NewUsernamesArray = new string[Usernames.Length - 1];
+            string[] NewPasswordsArray = new string[Accessibles.Length - 1];
+
+            //fill the new arrays with the information from the old accounts array disregarding the array index that is to be deleted
+            for (int i = 0; i < Accounts.Length; i++)
+            { if (i != accountarrayvalue) { NewAccountsArray[i] = Accounts[i]; NewUsernamesArray[i] = Usernames[i]; NewPasswordsArray[i] = Accessibles[i]; } }
+
+            //write the new account information to the text file
+            File.WriteAllLines(@"C:\Users\Public\Documents\Accounts.txt", NewAccountsArray);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Usernames.txt", NewUsernamesArray);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Accessibles.txt", NewPasswordsArray);
+
+            //read the account information to the old arrays so that the form can now have updated information
+            Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
+            Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
+            Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
+
+            //StreamWriter Accountsfile = new StreamWriter(@"C:\Users\Public\Documents\Accounts.txt");
+            //StreamWriter Accessiblesfile = new StreamWriter(@"C:\Users\Public\Documents\Accessibles.txt");
+            //StreamWriter Usernamesfile = new StreamWriter(@"C:\Users\Public\Documents\Usernames.txt");
+            //for (int i = 0; i < Accounts.Length; i++) { Accountsfile.WriteLine(Accounts[i]); }
+            //for (int i = 0; i < Usernames.Length; i++) { Usernamesfile.WriteLine(Usernames[i]); }
+            //for (int i = 0; i < Accessibles.Length; i++) { Accessiblesfile.WriteLine(Accessibles[i]); }
+            //Accountsfile.Close(); Usernamesfile.Close(); Accessiblesfile.Close();
+            //foreach (string line in Accounts)
+            //{
+            //    if (!line.Contains(Accounts[accountarrayvalue]))
+            //    { Accountsfile.WriteLine(line); }
+            //}
+            //foreach (string line in Usernames)
+            //{
+            //    if (!line.Contains(Usernames[accountarrayvalue]))
+            //    { Usernamesfile.WriteLine(line); }
+            //}
+            //foreach (string line in Accessibles)
+            //{
+            //    if (!line.Contains(Accessibles[accountarrayvalue]))
+            //    { Accessiblesfile.WriteLine(line); }
+            //}
+            //Accountsfile.Close();
+            //Usernamesfile.Close();
+            //Accessiblesfile.Close();
 
         }
         private int ValidateAccount(string input)
