@@ -9,33 +9,24 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
+using System.Security.Cryptography;
+
 namespace PasswordManager
 {
     public partial class Form1 : Form
     {
-        #region Variables
-        string[] Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
-        string[] Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
-        string[] Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
+        #region ArraysOfInformation
+        string[] Accounts;
+        string[] Accessibles;
+        string[] Usernames;
         #endregion
 
         public Form1()
         {
+            GetArrays();
             InitializeComponent();
             LogBox.Visible = false;
             richTextBox1.Width = richTextBox1.Width + 180;
-            //richTextBox1.AppendText("Which account would you like?\r\n"); richTextBox1.Focus();
-            //inputText.();
-            //StreamWriter Accountsfile = new StreamWriter(@"C:\Users\Public\Documents\Accounts.txt");
-            //StreamWriter Accessiblesfile = new StreamWriter(@"C:\Users\Public\Documents\Accessibles.txt");
-            //StreamWriter Usernamesfile = new StreamWriter(@"C:\Users\Public\Documents\Usernames.txt");
-            //for(int i = 0; i<Accounts.Length; i++) { Accountsfile.WriteLine(Accounts[i]); }
-            //for(int i = 0; i<Usernames.Length; i++) { Usernamesfile.WriteLine(Usernames); }
-            //for(int i = 0; i<Accessibles.Length; i++) { Accessiblesfile.WriteLine(Accessibles); }
-            //Accountsfile.Close();
-            //Usernamesfile.Close();
-            //Accessiblesfile.Close();
-
         }
 
         //This is outside the method because it shouldn't be reset to 0 every time the check box is clicked
@@ -63,6 +54,7 @@ namespace PasswordManager
             for (int i=0; i<Accounts.Length; i++)
             { richTextBox1.AppendText(Accounts[i] + "\r\n"); }
 
+            RefreshArrays();
             //auto scroll the text box to show last output
             richTextBox1.Focus();
         }
@@ -98,8 +90,27 @@ namespace PasswordManager
            
         }
 
+        private void GetArrays()
+        {
+            DecryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
+            DecryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
+            DecryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
+
+            //read the account information to the old arrays so that the form can now have updated information
+            Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
+            Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
+            Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
+
+            EncryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
+            EncryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
+            EncryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
+        }
+
         private void RefreshArrays()
         {
+            DecryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
+            DecryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
+            DecryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
             //write the new account information to the text file
             File.WriteAllLines(@"C:\Users\Public\Documents\Accounts.txt", Accounts);
             File.WriteAllLines(@"C:\Users\Public\Documents\Usernames.txt", Usernames);
@@ -109,6 +120,84 @@ namespace PasswordManager
             Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
             Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
             Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
+            EncryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
+            EncryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
+            EncryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
+
+        }
+
+        private static void EncryptFile(string inputFile, string outputFile, string skey)
+        {
+            try
+            {
+                using (RijndaelManaged aes = new RijndaelManaged())
+                {
+                    byte[] key = ASCIIEncoding.UTF8.GetBytes(skey);
+
+                    /* This is for demostrating purposes only. 
+                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
+                    byte[] IV = ASCIIEncoding.UTF8.GetBytes(skey);
+
+                    using (FileStream fsCrypt = new FileStream(outputFile, FileMode.Create))
+                    {
+                        using (ICryptoTransform encryptor = aes.CreateEncryptor(key, IV))
+                        {
+                            using (CryptoStream cs = new CryptoStream(fsCrypt, encryptor, CryptoStreamMode.Write))
+                            {
+                                using (FileStream fsIn = new FileStream(inputFile, FileMode.Open))
+                                {
+                                    int data;
+                                    while ((data = fsIn.ReadByte()) != -1)
+                                    {
+                                        cs.WriteByte((byte)data);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // failed to encrypt file
+            }
+        }
+
+        private static void DecryptFile(string inputFile, string outputFile, string skey)
+        {
+            try
+            {
+                using (RijndaelManaged aes = new RijndaelManaged())
+                {
+                    byte[] key = ASCIIEncoding.UTF8.GetBytes(skey);
+
+                    /* This is for demostrating purposes only. 
+                     * Ideally you will want the IV key to be different from your key and you should always generate a new one for each encryption in other to achieve maximum security*/
+                    byte[] IV = ASCIIEncoding.UTF8.GetBytes(skey);
+
+                    using (FileStream fsCrypt = new FileStream(inputFile, FileMode.Open))
+                    {
+                        using (FileStream fsOut = new FileStream(outputFile, FileMode.Create))
+                        {
+                            using (ICryptoTransform decryptor = aes.CreateDecryptor(key, IV))
+                            {
+                                using (CryptoStream cs = new CryptoStream(fsCrypt, decryptor, CryptoStreamMode.Read))
+                                {
+                                    int data;
+                                    while ((data = cs.ReadByte()) != -1)
+                                    {
+                                        fsOut.WriteByte((byte)data);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // failed to decrypt file
+            }
         }
 
         private void GetPassword(int accountarrayvalue)
@@ -234,7 +323,11 @@ namespace PasswordManager
 
             //fill the new arrays with the information from the old accounts array disregarding the array index that is to be deleted
             for (int i = 0; i < Accounts.Length; i++)
-            { if (i != accountarrayvalue) { NewAccountsArray[i] = Accounts[i]; NewUsernamesArray[i] = Usernames[i]; NewPasswordsArray[i] = Accessibles[i]; } }
+            {
+                if (i < accountarrayvalue) { NewAccountsArray[i] = Accounts[i]; NewUsernamesArray[i] = Usernames[i]; NewPasswordsArray[i] = Accessibles[i]; }
+                //if (i == accountarrayvalue) { }
+                if (i > accountarrayvalue) { NewAccountsArray[i-1] = Accounts[i]; NewUsernamesArray[i-1] = Usernames[i]; NewPasswordsArray[i-1] = Accessibles[i]; }
+            }
 
             //write the new account information to the text file
             File.WriteAllLines(@"C:\Users\Public\Documents\Accounts.txt", NewAccountsArray);
