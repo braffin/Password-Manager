@@ -23,7 +23,27 @@ namespace PasswordManager
 
         public Form1()
         {
-            GetArrays();
+            #region obtain decrypted arrays
+            //DecryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "key");
+            File.Decrypt(@"C:\Users\Public\Documents\Accounts.txt");
+            Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
+
+            //DecryptFile(@"C:\Users\Public\Documents\Usernames.txt", @"C:\Users\Public\Documents\Usernames.txt", "key");
+            File.Decrypt(@"C:\Users\Public\Documents\Usernames.txt");
+            Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
+
+            //DecryptFile(@"c:\users\public\documents\accessibles.txt", @"c:\users\public\documents\Accessibles.txt", "key");
+            File.Decrypt(@"C:\Users\Public\Documents\Accessibles.txt");
+            Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
+
+            ////File.Encrypt(@"C:\Users\Public\Documents\Accounts.txt");
+            ////File.Encrypt(@"C:\Users\Public\Documents\Usernames.txt");
+            ////File.Encrypt(@"C:\Users\Public\Documents\Accessibles.txt");
+            //EncryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "key");
+            //EncryptFile(@"C:\Users\Public\Documents\Usernames.txt", @"C:\Users\Public\Documents\Usernames.txt", "key");
+            //EncryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "key");
+            #endregion
+
             InitializeComponent();
             LogBox.Visible = false;
             richTextBox1.Width = richTextBox1.Width + 180;
@@ -92,25 +112,18 @@ namespace PasswordManager
 
         private void GetArrays()
         {
-            DecryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
-            DecryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
-            DecryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
-
-            //read the account information to the old arrays so that the form can now have updated information
-            Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
-            Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
-            Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
-
-            EncryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
-            EncryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
-            EncryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
+            
         }
 
         private void RefreshArrays()
         {
-            DecryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
-            DecryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
-            DecryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
+            //DecryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "key");
+            //DecryptFile(@"C:\Users\Public\Documents\Usernames.txt", @"C:\Users\Public\Documents\Usernames.txt", "key");
+            //DecryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "key");
+            File.Decrypt(@"C:\Users\Public\Documents\Accounts.txt");
+            File.Decrypt(@"C:\Users\Public\Documents\Usernames.txt");
+            File.Decrypt(@"C:\Users\Public\Documents\Accessibles.txt");
+
             //write the new account information to the text file
             File.WriteAllLines(@"C:\Users\Public\Documents\Accounts.txt", Accounts);
             File.WriteAllLines(@"C:\Users\Public\Documents\Usernames.txt", Usernames);
@@ -120,9 +133,13 @@ namespace PasswordManager
             Accounts = File.ReadAllLines(@"C:\Users\Public\Documents\Accounts.txt");
             Usernames = File.ReadAllLines(@"C:\Users\Public\Documents\Usernames.txt");
             Accessibles = File.ReadAllLines(@"C:\Users\Public\Documents\Accessibles.txt");
-            EncryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "1234512345678976");
-            EncryptFile(@"C:\Users\Public\Documents\Usernaems.txt", @"C:\Users\Public\Documents\Usernames.txt", "1234512345678976");
-            EncryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "1234512345678976");
+
+            File.Encrypt(@"C:\Users\Public\Documents\Accounts.txt");
+            File.Encrypt(@"C:\Users\Public\Documents\Usernames.txt");
+            File.Encrypt(@"C:\Users\Public\Documents\Accessibles.txt");
+            //EncryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "key");
+            //EncryptFile(@"C:\Users\Public\Documents\Usernames.txt", @"C:\Users\Public\Documents\Usernames.txt", "key");
+            //EncryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "key");
 
         }
 
@@ -417,5 +434,27 @@ namespace PasswordManager
             else { richTextBox1.AppendText("Account not found\r\n"); return (1000000000); }
 
         }//end VerifyDoesn'tExist
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //DecryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "key");
+            //DecryptFile(@"C:\Users\Public\Documents\Usernames.txt", @"C:\Users\Public\Documents\Usernames.txt", "key");
+            //DecryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "key");
+            File.Decrypt(@"C:\Users\Public\Documents\Accounts.txt");
+            File.Decrypt(@"C:\Users\Public\Documents\Usernames.txt");
+            File.Decrypt(@"C:\Users\Public\Documents\Accessibles.txt");
+
+            //write the new account information to the text file
+            File.WriteAllLines(@"C:\Users\Public\Documents\Accounts.txt", Accounts);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Usernames.txt", Usernames);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Accessibles.txt", Accessibles);
+
+            File.Encrypt(@"C:\Users\Public\Documents\Accounts.txt");
+            File.Encrypt(@"C:\Users\Public\Documents\Usernames.txt");
+            File.Encrypt(@"C:\Users\Public\Documents\Accessibles.txt");
+            //EncryptFile(@"C:\Users\Public\Documents\Accounts.txt", @"C:\Users\Public\Documents\Accounts.txt", "key");
+            //EncryptFile(@"C:\Users\Public\Documents\Usernames.txt", @"C:\Users\Public\Documents\Usernames.txt", "key");
+            //EncryptFile(@"C:\Users\Public\Documents\Accessibles.txt", @"C:\Users\Public\Documents\Accessibles.txt", "key");
+        }
     } //end class
 }//end namespace
